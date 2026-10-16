@@ -1,4 +1,4 @@
-﻿决构编辑器 MDPro3 安装器 0.2.5 / Mono 适配验证版
+﻿决构编辑器 MDPro3 安装器 0.2.6 / Mono 适配验证版
 
 输入：用户提供的 MDPro3-适配资料-Mono.zip，Unity 6000.0.24f1。
 Mono 主程序 SHA256：5c9f5fa0eeeabf1121b4d4120853f1236a3a8ae638e3e1e822701ed70c565246
