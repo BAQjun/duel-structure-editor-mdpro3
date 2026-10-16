@@ -17,6 +17,8 @@ namespace DuelStructure {
    var old=before.FirstOrDefault(c=>c.Id==cmd.Target);if(old.Id==0)old=after.FirstOrDefault(c=>c.Id==cmd.Target);var now=cmd.Opcode==1?after.FirstOrDefault(c=>!before.Any(b=>b.Id==c.Id)):after.FirstOrDefault(c=>c.Id==cmd.Target);string text;
    switch(cmd.Opcode){
     case 1:text="在"+Place(now)+"生成"+((now.EffectiveType&1)!=0?"怪兽":"卡片")+Card(now);if((now.Location&12)!=0)text+="（"+Position(now.Position)+(now.Location==4?"；"+Method(now.SummonMethod)+"状态；攻击力 "+(int)now.Attack+"／守备力 "+(int)now.Defense:"")+"）";if(now.Owner!=now.Player)text+="；原持有者为"+Player(now.Owner);break;
+    case 12:text="将"+Card(now)+"的召唤履历设为"+EditorSummonHistoryRules.Name(cmd.Value)+"召唤";break;
+    case 13:text=Name(cmd.Code)+"作为召唤素材："+Player(cmd.Player)+"的"+Zone(cmd.Location)+((cmd.Location&12)!=0?"第 "+(cmd.Sequence+1)+" 格":"")+" → "+Player(cmd.Attack)+"的"+Zone(cmd.Value)+((cmd.Value&12)!=0?"第 "+(cmd.Defense+1)+" 格":"");break;
     case 2:text="将"+Player(cmd.Player)+"的 LP 设为 "+cmd.Value;break;
     case 3:text="从"+Place(old)+"删除"+Card(old);break;
     case 4:var changes=new List<string>();

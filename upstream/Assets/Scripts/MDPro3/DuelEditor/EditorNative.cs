@@ -20,11 +20,23 @@ namespace MDPro3.DuelEditor {
   public uint Code,Alias;[MarshalAs(UnmanagedType.ByValArray,SizeConst=16)]public ushort[] SetCode;
   public uint Type,Level,Attribute,Race;public int Attack,Defense;public uint LScale,RScale,LinkMarker,RuleCode;
  }
+ [StructLayout(LayoutKind.Sequential)] public struct EditorSummonMaterial {
+  public ulong HostId,CardId;
+  public uint Code,Owner,SourcePlayer,SourceLocation,SourceSequence,SourcePosition,DestinationPlayer,DestinationLocation,DestinationSequence,DestinationPosition;
+ }
+ public static class EditorSummonHistoryRules {
+  public static uint Kind(uint type,uint method,uint source,uint location){if(method!=1||location!=4)return 0;if((type&0x80)!=0)return 5;if(source!=64)return 0;return (type&0x40)!=0?1u:(type&0x2000)!=0?2u:(type&0x800000)!=0?3u:(type&0x4000000)!=0?4u:0;}
+  public static string Name(uint kind)=>kind==1?"融合":kind==2?"同调":kind==3?"超量":kind==4?"连接":kind==5?"仪式":"特殊";
+  public static uint[] Zones(uint type){var zones=new System.Collections.Generic.List<uint>();if((type&0x4802040)==0){zones.Add(1);zones.Add(2);}zones.Add(4);zones.Add(8);zones.Add(16);zones.Add(32);if((type&0x5802040)!=0)zones.Add(64);return zones.ToArray();}
+ }
  [StructLayout(LayoutKind.Sequential)] public struct EditorMaterial {public ulong HostId,CardId;public uint Code,Owner;}
  [StructLayout(LayoutKind.Sequential)] public struct EditorCounter {public ulong CardId;public uint Type,Count;}
  [StructLayout(LayoutKind.Sequential)] public struct EditorEffect {public ulong CardId;public uint Code;public int Value;}
  public static class EditorNative {
   const string Library="ocgcore_editor";
+ [DllImport(Library,CallingConvention=CallingConvention.Cdecl)]public static extern uint editor_summon_kind(IntPtr duel,ulong id);
+ [DllImport(Library,CallingConvention=CallingConvention.Cdecl)]public static extern uint editor_list_summon_materials(IntPtr duel,ulong id,[Out]EditorSummonMaterial[] output,uint count);
+
  [DllImport(Library,CallingConvention=CallingConvention.Cdecl)]public static extern int editor_native_trap_profile(uint code,out EditorCard output);
  [DllImport(Library,CallingConvention=CallingConvention.Cdecl)]public static extern uint editor_list_materials(IntPtr duel,[Out]EditorMaterial[] output,uint count);
  [DllImport(Library,CallingConvention=CallingConvention.Cdecl)]public static extern uint editor_list_counters(IntPtr duel,[Out]EditorCounter[] output,uint count);

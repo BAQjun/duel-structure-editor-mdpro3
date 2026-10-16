@@ -12,7 +12,7 @@ using UnityEngine;
 using CardDB=MDPro3.Duel.YGOSharp.CardsManager;
 
 namespace DuelStructure {
- [BepInPlugin("cn.duelstructure.mdpro3","决构编辑器","0.2.4")]
+ [BepInPlugin("cn.duelstructure.mdpro3","决构编辑器","0.3.0")]
  public class Plugin:BasePlugin {
   public static Plugin Instance;
   public override void Load(){
@@ -21,7 +21,7 @@ namespace DuelStructure {
    foreach(var name in new[]{"libunwind.dll","libc++.dll","ocgcore_editor.dll"}) NativeLibrary.Load(Path.Combine(dir,name));
    EditorNative.Register(ReadCard,ReadScript,s=>Log.LogWarning("编辑核心: "+s));
    var harmony=new Harmony("cn.duelstructure.mdpro3");harmony.PatchAll(typeof(Plugin).Assembly);
-   AddComponent<EditorBehaviour>();Log.LogInfo("DUEL_EDITOR_READY 0.2.4");
+   AddComponent<EditorBehaviour>();Log.LogInfo("DUEL_EDITOR_READY 0.3.0");
   }
   static NativeCardData ReadCard(uint code){var c=CardDB.Get((int)code,false);var sets=new ushort[16];for(int i=0;i<4;i++)sets[i]=(ushort)((ulong)c.Setcode>>(16*i));return new NativeCardData{Code=(uint)c.Id,Alias=(uint)c.Alias,RuleCode=(uint)c.RuleCode,SetCode=sets,Type=(uint)c.Type,Level=(uint)c.Level,Race=(uint)c.Race,Attribute=(uint)c.Attribute,Attack=c.Attack,Defense=c.Defense,LScale=(uint)c.LScale,RScale=(uint)c.RScale,LinkMarker=(uint)c.LinkMarker};}
   static byte[] ReadScript(string name){name=name.TrimStart('.','/');var bytes=MDPro3.IO.FileManager.GetFile(name);return bytes==null?null:bytes.ToArray();}
