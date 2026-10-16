@@ -1,0 +1,24 @@
+using System;using System.IO;using System.Linq;using System.Collections.Generic;using UnityEngine;using UnityEngine.UI;using MDPro3;using MDPro3.Duel;using MDPro3.DuelEditor;
+namespace DuelStructure {
+ static class NativeLogPerspective {
+  static readonly Dictionary<IntPtr,Sprite> oppositeSprites=new Dictionary<IntPtr,Sprite>();
+  static void PrepareSprites(){if(oppositeSprites.Count>0||TextureManager.container==null)return;foreach(uint location in new uint[]{1,2,4,8,16,32,64})for(uint seq=0;seq<(location==4?7:location==8?6:1);seq++){var own=TextureManager.container.GetLocationIcons(new GPS{controller=0,location=location,sequence=seq,position=1});var other=TextureManager.container.GetLocationIcons(new GPS{controller=1,location=location,sequence=seq,position=1});for(int i=0;i<Math.Min(own.Count,other.Count);i++)if(own[i]!=null&&other[i]!=null&&own[i].Pointer!=other[i].Pointer){oppositeSprites[own[i].Pointer]=other[i];oppositeSprites[other[i].Pointer]=own[i];}}}
+  static Color Flip(Color value){Color[] from={DuelLog.myColor,DuelLog.opColor,DuelLog.myArrowColor,DuelLog.opArrowColor};Color[] to={DuelLog.opColor,DuelLog.myColor,DuelLog.opArrowColor,DuelLog.myArrowColor};for(int i=0;i<from.Length;i++)if(Math.Abs(value.r-from[i].r)<.005f&&Math.Abs(value.g-from[i].g)<.005f&&Math.Abs(value.b-from[i].b)<.005f){var result=to[i];result.a=value.a;return result;}return value;}
+  static string Flip(string text)=>text.Replace("我方","\u0001").Replace("对方","我方").Replace("敌方","我方").Replace("\u0001","对方");
+  public sealed class Snapshot {
+   sealed class Caption{public Text label;public string text;public Color color;}
+   sealed class Icon{public Image image;public Sprite sprite;public Material material;public Color color;}
+   readonly int origin;int shown;readonly Caption[] captions;readonly Icon[] icons;readonly GameObject go;
+   public Snapshot(GameObject item,int? sourceView=null){PrepareSprites();go=item;origin=shown=sourceView??Host.Session.View;captions=item.GetComponentsInChildren<Text>(true).Select(t=>new Caption{label=t,text=t.text,color=t.color}).ToArray();icons=item.GetComponentsInChildren<Image>(true).Select(i=>new Icon{image=i,sprite=i.sprite,material=i.material,color=i.color}).ToArray();}
+   public int CanonicalOwner{get{if(go.transform.childCount<=1)return -1;var side=go.transform.GetChild(1).GetComponent<Image>();var icon=icons.FirstOrDefault(i=>side!=null&&i.image.Pointer==side.Pointer);if(icon==null)return -1;return Same(icon.color,DuelLog.myColor)?origin:Same(icon.color,DuelLog.opColor)?1-origin:-1;}}
+   static bool Same(Color a,Color b)=>Math.Abs(a.r-b.r)<.005f&&Math.Abs(a.g-b.g)<.005f&&Math.Abs(a.b-b.b)<.005f;
+   public bool SideMatchesCurrentView{get{int player=CanonicalOwner;if(player<0)return false;return Same(go.transform.GetChild(1).GetComponent<Image>().color,player==Host.Session.View?DuelLog.myColor:DuelLog.opColor);}}
+   public void Apply(){int view=Host.Session.View;if(shown==view)return;bool flip=view!=origin;foreach(var c in captions)if(c.label!=null){c.label.text=flip?Flip(c.text):c.text;c.label.color=flip?Flip(c.color):c.color;}foreach(var i in icons)if(i.image!=null){i.image.color=flip?Flip(i.color):i.color;i.image.sprite=flip&&i.sprite!=null&&oppositeSprites.TryGetValue(i.sprite.Pointer,out var other)?other:i.sprite;}
+    if(go.name.StartsWith("DuelLogNewTurn")&&go.transform.childCount>8){var a=go.transform.GetChild(3).GetComponent<Image>();var b=go.transform.GetChild(4).GetComponent<Image>();var sa=icons.FirstOrDefault(i=>i.image.Pointer==a.Pointer);var sb=icons.FirstOrDefault(i=>i.image.Pointer==b.Pointer);if(sa!=null&&sb!=null){a.sprite=flip?sb.sprite:sa.sprite;b.sprite=flip?sa.sprite:sb.sprite;a.material=flip?sb.material:sa.material;b.material=flip?sa.material:sb.material;}var x=go.transform.GetChild(7).GetComponent<Text>();var y=go.transform.GetChild(8).GetComponent<Text>();var cx=captions.FirstOrDefault(c=>c.label.Pointer==x.Pointer);var cy=captions.FirstOrDefault(c=>c.label.Pointer==y.Pointer);if(cx!=null&&cy!=null){x.text=flip?cy.text:cx.text;y.text=flip?cx.text:cy.text;}}
+    shown=view;
+   }
+  }
+  public static void SyncDirection(){if(Host.Session==null)return;var log=Program.instance.ocgcore.messageDispatcher.log;log.isFirst=Host.Session.View==0;log.myTurn=EditorNative.editor_turn_player(Host.Session.Handle)==Host.Session.View;}
+  public static void SyncReload(byte[] data){SyncDirection();var s=Host.Session;var log=Program.instance.ocgcore.messageDispatcher.log;log.turns=(int)EditorNative.editor_turn_id(s.Handle);var life=new int[2];using(var reader=new BinaryReader(new MemoryStream(data))){reader.ReadBytes(2);for(int p=0;p<2;p++){life[p]=reader.ReadInt32();for(int i=0;i<7;i++)if(reader.ReadByte()!=0)reader.ReadBytes(2);for(int i=0;i<8;i++)if(reader.ReadByte()!=0)reader.ReadByte();reader.ReadBytes(6);}}LogMessage.life0=life[s.View];LogMessage.life1=life[1-s.View];}
+ }
+}

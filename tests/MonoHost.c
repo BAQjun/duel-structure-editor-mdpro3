@@ -1,0 +1,5 @@
+#include <windows.h>
+#include <stdio.h>
+#include <stdlib.h>
+int main(int argc,char** argv){if(argc<4)return 2;LoadLibraryA("libunwind.dll");LoadLibraryA("libc++.dll");LoadLibraryA("ocgcore_editor.dll");HMODULE mono=LoadLibraryA(argv[2]);if(!mono){printf("Mono load error %lu\n",GetLastError());return 3;}
+ void (__cdecl *set_path)(const char*)=(void*)GetProcAddress(mono,"mono_set_assemblies_path");void* (__cdecl *init)(const char*,const char*)=(void*)GetProcAddress(mono,"mono_jit_init_version");void* (__cdecl *open)(void*,const char*)=(void*)GetProcAddress(mono,"mono_domain_assembly_open");int (__cdecl *exec)(void*,void*,int,char**)=(void*)GetProcAddress(mono,"mono_jit_exec");void (__cdecl *parse)(const char*)=(void*)GetProcAddress(mono,"mono_config_parse");if(!set_path||!init||!open||!exec)return 4;set_path(argv[1]);if(parse)parse(NULL);void* domain=init("DuelStructureMonoTests","v4.0.30319");if(!domain)return 5;void* assembly=open(domain,argv[3]);if(!assembly)return 6;return exec(domain,assembly,argc-3,argv+3);}

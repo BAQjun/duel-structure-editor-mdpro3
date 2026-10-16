@@ -1,0 +1,39 @@
+using System;using System.Collections.Generic;using System.IO;using System.Linq;using UnityEngine;using MDPro3.DuelEditor;
+using DB=MDPro3.Duel.YGOSharp.CardsManager;
+using GUILayout=DuelStructure.NativeUI.Layout;
+namespace DuelStructure {
+ public partial class EditorBehaviour {
+  sealed class MaterialDraft {public ulong Id;public uint Code,Owner;}
+  sealed class CounterDraft {public uint Type;public string Count;}
+  static readonly List<MaterialDraft> materialDraft=new List<MaterialDraft>();
+  static readonly List<CounterDraft> counterDraft=new List<CounterDraft>();
+  static readonly Dictionary<uint,string> counterNames=new Dictionary<uint,string>();
+  static bool attachmentsReady;static int attachmentTab;static string attachmentSearch="",attachmentQuantity="1";static uint materialOwner;static Vector2 attachmentResults,attachmentList;
+  static void ResetAttachments(){attachmentsReady=false;materialDraft.Clear();counterDraft.Clear();attachmentSearch="";attachmentQuantity="1";attachmentResults=attachmentList=Vector2.zero;}
+  static void ReadAttachments(){materialDraft.Clear();counterDraft.Clear();if(selected!=0){foreach(var m in Host.Session.Materials().Where(m=>m.HostId==selected))materialDraft.Add(new MaterialDraft{Id=m.CardId,Code=m.Code,Owner=m.Owner});foreach(var c in Host.Session.Counters().Where(c=>c.CardId==selected))counterDraft.Add(new CounterDraft{Type=c.Type,Count=c.Count.ToString()});}attachmentsReady=true;materialOwner=owner;}
+  static void LoadCounterNames(){if(counterNames.Count>0)return;foreach(var item in MDPro3.StringHelper.hashedStrings)if(item.region=="counter"&&item.hashCode>0&&item.hashCode<=65535)counterNames[(uint)item.hashCode]=item.content;}
+  internal static string CounterName(uint type){LoadCounterNames();return counterNames.TryGetValue(type,out string name)?name:"指示物";}
+  static void OpenAttachments(int tab){if(!attachmentsReady)ReadAttachments();attachmentTab=tab;attachmentSearch="";attachmentResults=attachmentList=Vector2.zero;page=5;LoadCounterNames();}
+  static void AddMaterialDraft(uint card){uint n=Num(attachmentQuantity,255);if(n==0||materialDraft.Count+n>255)throw new InvalidDataException("超量素材合计为 1～255 张");if(((uint)DB.Get((int)card,false).Type&0x4000)!=0)throw new InvalidDataException("衍生物不能作为超量素材");for(int i=0;i<n;i++)materialDraft.Add(new MaterialDraft{Code=card,Owner=materialOwner});}
+  static void AddCounterDraft(uint type){uint n=Num(attachmentQuantity,65535);if(n==0)throw new InvalidDataException("指示物数量为 1～65535");var c=counterDraft.FirstOrDefault(c=>c.Type==type);if(c==null)counterDraft.Add(new CounterDraft{Type=type,Count=n.ToString()});else{uint total=Num(c.Count,65535)+n;if(total>65535)throw new InvalidDataException("同类指示物最多 65535 个");c.Count=total.ToString();}}
+  public static void ProbeAttachmentSetup(uint card){NewCard(card);zone=4;method=1;source=64;open=true;page=2;shapeTab=0;shapeScroll=Vector2.zero;}
+  public static void ProbeAttachmentSearch(string term,string count){attachmentSearch=term;attachmentQuantity=count;materialOwner=1;}
+  public static int DraftMaterialCount=>materialDraft.Count;public static uint DraftCounterCount=>counterDraft.Count==0?0:Num(counterDraft[0].Count,65535);
+  public static void ProbeExistingAttachments(ulong id){LoadCard(Host.Session.Cards().Single(c=>c.Id==id));page=2;shapeTab=0;shapeScroll=Vector2.zero;}
+  public static void ProbeMonsterAsSpell(bool value){form=value?1u:0u;}
+  static void AttachmentPage(){if(code==0){page=1;return;}LegacyWindow(620,580,attachmentTab==0?"添加超量素材":"放置指示物");LL(15,35,590,29,attachmentTab==0?"已配置超量素材："+materialDraft.Count+" 张":"已配置指示物："+counterDraft.Count+" 类");LL(15,76,85,28,attachmentTab==0?"搜索卡片":"搜索指示物");LI(105,73,300,30,ref attachmentSearch);LL(420,76,55,28,"数量");LI(480,73,125,30,ref attachmentQuantity);
+   if(attachmentTab==0){LL(15,111,100,28,"素材持有者");materialOwner=LP(115,108,180,28,"materialOwner","",materialOwner,new[]{"玩家 1","玩家 2"},new uint[]{0,1});LL(310,112,295,24,"搜索卡名或卡号，点击结果添加");}else LL(15,111,590,26,"搜索名称或编号；点击添加，可在下方修改数量。");
+   LegacyList(15,146,590,145,ref attachmentResults,()=>{if(attachmentTab==0){foreach(var pair in catalog.Where(p=>attachmentSearch!=""&&(p.Value.IndexOf(attachmentSearch,StringComparison.OrdinalIgnoreCase)>=0||p.Key.ToString().Contains(attachmentSearch))).Where(p=>((uint)DB.Get((int)p.Key,false).Type&0x4000)==0).Take(100)){if(GUILayout.Button(pair.Value+" ["+pair.Key+"]",GUILayout.Height(28)))Act(()=>AddMaterialDraft(pair.Key));}}else foreach(var pair in counterNames.OrderBy(p=>p.Key).Where(p=>attachmentSearch==""||p.Value.IndexOf(attachmentSearch,StringComparison.OrdinalIgnoreCase)>=0||p.Key.ToString().Contains(attachmentSearch)||("0x"+p.Key.ToString("X")).IndexOf(attachmentSearch,StringComparison.OrdinalIgnoreCase)>=0).Take(150)){if(GUILayout.Button(pair.Value+" [0x"+pair.Key.ToString("X")+"]",GUILayout.Height(28)))Act(()=>AddCounterDraft(pair.Key));}});
+   LL(15,302,590,26,attachmentTab==0?"已配置素材（移除只删除这张素材）":"已配置指示物（数量设为 0 或移除可清除）");
+   LegacyList(15,333,590,135,ref attachmentList,()=>{if(attachmentTab==0){for(int i=0;i<materialDraft.Count;i++){var m=materialDraft[i];GUILayout.BeginHorizontal();GUILayout.Label((i+1)+" · "+CardName(m.Code)+" · 玩家 "+(m.Owner+1));if(GUILayout.Button("移除",GUILayout.Width(65))){materialDraft.RemoveAt(i);GUILayout.EndHorizontal();break;}GUILayout.EndHorizontal();}}else{for(int i=0;i<counterDraft.Count;i++){var c=counterDraft[i];GUILayout.BeginHorizontal();GUILayout.Label(CounterName(c.Type)+" [0x"+c.Type.ToString("X")+"]");c.Count=GUILayout.TextField(c.Count,GUILayout.Width(95));if(GUILayout.Button("移除",GUILayout.Width(65))){counterDraft.RemoveAt(i);GUILayout.EndHorizontal();break;}GUILayout.EndHorizontal();}}});
+   LL(15,480,590,30,Host.Error!=""?Host.Error:"返回后点击生成卡片／保存修改，配置才会生效。");if(LB(15,531,590,33,"返回卡片形态"))page=2;
+  }
+  static void SubmitWithAttachments(EditCommand baseCommand){if(!attachmentsReady){Apply(baseCommand);return;}var session=Host.Session;var commands=new List<EditCommand>{baseCommand};var currentMaterials=session.Materials().Where(m=>m.HostId==selected).ToArray();var currentCounters=session.Counters().Where(c=>c.CardId==selected).ToArray();bool xyz=zone==4&&(EffectiveType&0x800000)!=0;bool onField=zone==4||zone==8||zone==0x100||zone==0x200;
+   if(materialDraft.Count>0&&!xyz)throw new InvalidDataException("请先移除配置的超量素材，或将卡片设为场上的超量怪兽");if(counterDraft.Any(c=>Num(c.Count,65535)>0)&&(!onField||(position&5)==0))throw new InvalidDataException("指示物只能放置在场上表侧表示的卡片上");
+   foreach(var m in currentMaterials)if(!materialDraft.Any(d=>d.Id==m.CardId)){var remove=EditCommand.Create(3);remove.Target=m.CardId;commands.Add(remove);}
+   foreach(var group in materialDraft.Where(m=>m.Id==0).GroupBy(m=>new{m.Code,m.Owner})){var add=EditCommand.Create(9);add.Target=selected;add.Code=group.Key.Code;add.Owner=group.Key.Owner;add.Value=(uint)group.Count();commands.Add(add);}
+   foreach(uint type in currentCounters.Select(c=>c.Type).Union(counterDraft.Select(c=>c.Type))){var draft=counterDraft.FirstOrDefault(c=>c.Type==type);uint next=draft==null?0:Num(draft.Count,65535);var old=currentCounters.FirstOrDefault(c=>c.Type==type);if(next==0&&old.Count==0)continue;var set=EditCommand.Create(10);set.Target=selected;set.Code=type;set.Value=next;commands.Add(set);}
+   var before=session.Cards();int result=session.ApplyGroup(commands);if(result!=0)throw new InvalidOperationException("素材／指示物未保存："+new[]{"成功","编辑器未启用","当前时点不可编辑","局面已变化","参数无效","卡片无效","不适用的卡片或数量","位置已占用"}[Math.Min(result,7)]);if(selected==0)selected=session.Cards().Single(c=>c.Location!=128&&!before.Any(b=>b.Id==c.Id)).Id;legacyMode=1;ReadAttachments();
+  }
+ }
+}

@@ -1,0 +1,7 @@
+using UnityEngine;using UnityEngine.UI;using MDPro3;using MDPro3.Servant;
+namespace DuelStructure {
+ static class NativeTimingVisual {
+  public static void Sync(){if(Host.Session==null||Program.instance.ocgcore.servantUI==null)return;var ui=Program.instance.ocgcore.GetUI<MDPro3.UI.ServantUI.OcgCoreUI>();uint mode=Host.Session.Timings[Host.Session.View];OcgCore.chainCondition=(OcgCore.ChainCondition)mode;var icons=mode==0?TextureManager.container.offTiming:mode==1?TextureManager.container.onTiming:TextureManager.container.autoTiming;if(icons==null||icons.Length<3)return;var button=ui.ButtonTiming;var image=button.GetComponent<Image>();var state=button.spriteState;if(image.sprite==icons[0]&&state.selectedSprite==icons[0]&&state.highlightedSprite==icons[1]&&state.pressedSprite==icons[2])return;image.sprite=icons[0];state.highlightedSprite=icons[1];state.pressedSprite=icons[2];state.selectedSprite=icons[0];state.disabledSprite=icons[0];button.spriteState=state;}
+  public static bool Matches(uint mode){var ui=Program.instance.ocgcore.GetUI<MDPro3.UI.ServantUI.OcgCoreUI>();var expected=mode==0?TextureManager.container.offTiming[0]:mode==1?TextureManager.container.onTiming[0]:TextureManager.container.autoTiming[0];return ui.ButtonTiming.GetComponent<Image>().sprite==expected&&ui.ButtonTiming.GetComponent<Image>().overrideSprite==expected&&ui.ButtonTiming.spriteState.selectedSprite==expected;}
+ }
+}
