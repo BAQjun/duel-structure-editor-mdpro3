@@ -12,7 +12,7 @@
 
 目标为 MDPro3 v1.4.8 / Unity 6000.0.24f1 / Windows x64，安装器会检查本体兼容性。原有 IL2CPP 版本已做过本体运行验证。Mono 版是按用户提供的程序集制作的适配验证版，尚未完成完整 Mono 本体的实际游戏启动和界面验证。
 
-Mono 组件已通过 74 项 64 位核心断言、210 个游戏成员访问检查、存档记录压缩读写及安装、更新、卸载检查。具体范围见 `docs/MDPro3-Mono-适配验证.txt`。
+Mono 组件已通过 80 项 64 位核心断言、210 个游戏成员访问检查、存档记录压缩读写及安装、更新、卸载检查。具体范围见 `docs/MDPro3-Mono-适配验证.txt`。
 
 ## 源码结构
 
@@ -33,3 +33,5 @@ IL2CPP 构建运行 `tools/build_extension.ps1`，需要自己的 MDPro3 互操�
 ## 第三方来源
 
 核心来自 [Fluorohydride/ygopro-core](https://github.com/Fluorohydride/ygopro-core)，保留 `native/core/LICENSE` 中的 MIT 许可证。扩展使用 [BepInEx](https://github.com/BepInEx/BepInEx) 和 Harmony；这些依赖及 MDPro3、Unity 的版权和许可证属于原作者，本仓库不对其重新授权。
+
+最近修复：[0.2.3 超量转连接的参数问题](docs/0.2.3-Link转换修复.md)。

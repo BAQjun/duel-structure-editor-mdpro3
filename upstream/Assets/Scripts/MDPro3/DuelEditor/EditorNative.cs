@@ -2,6 +2,11 @@ using System;
 using System.IO;
 using System.Runtime.InteropServices;
 namespace MDPro3.DuelEditor {
+ public static class EditorLinkRules {
+  public const uint MarkerMask=0x1ef;
+  public static uint Markers(uint type,uint marker)=>(type&0x4000000)!=0?marker&MarkerMask:0;
+  public static uint Rating(uint marker){uint count=0;for(uint bits=marker&MarkerMask;bits!=0;bits>>=1)count+=bits&1;return count;}
+ }
  [StructLayout(LayoutKind.Sequential)] public struct EditCommand {
   public uint Version,Opcode,Revision,Code,Owner,Player,Location,Sequence,Position,Value,TargetLow,TargetHigh,Form,Race,Attribute,Attack,Defense,Level,MonsterFlags,NameCode,States,Restrictions;
   public static EditCommand Create(uint opcode) => new EditCommand { Version=9,Opcode=opcode,Position=1,Level=4,MonsterFlags=1 };
