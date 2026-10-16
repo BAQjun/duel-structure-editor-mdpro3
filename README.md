@@ -35,3 +35,5 @@ IL2CPP 构建运行 `tools/build_extension.ps1`，需要自己的 MDPro3 互操�
 核心来自 [Fluorohydride/ygopro-core](https://github.com/Fluorohydride/ygopro-core)，保留 `native/core/LICENSE` 中的 MIT 许可证。扩展使用 [BepInEx](https://github.com/BepInEx/BepInEx) 和 Harmony；这些依赖及 MDPro3、Unity 的版权和许可证属于原作者，本仓库不对其重新授权。
 
 最近修复：[0.2.3 超量转连接的参数问题](docs/0.2.3-Link转换修复.md)。
+
+最新修复：[0.2.4 自定义连接怪兽的表示限制](docs/0.2.4-连接表示限制.md)，已同步两个版本。
