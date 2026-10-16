@@ -35,7 +35,7 @@ interop 是针对适配本体自动生成的互操作绑定；unity-libs 为 Bep
 (license_dir/'THIRD-PARTY-NOTICES.txt').write_text(license_text,encoding='utf-8')
 add(license_dir/'THIRD-PARTY-NOTICES.txt','BepInEx/plugins/DuelStructure/licenses/THIRD-PARTY-NOTICES.txt','extension')
 add(ROOT/'native/core/LICENSE','BepInEx/plugins/DuelStructure/licenses/ygopro-core-LICENSE.txt','extension')
-root=ET.Element('Payload');ET.SubElement(root,'Version').text='0.2.2.20261016';ET.SubElement(root,'MetadataSha').text=sha(GAME/'MDPro3_Data/il2cpp_data/Metadata/global-metadata.dat');ET.SubElement(root,'UnitySha').text=sha(GAME/'UnityPlayer.dll');ET.SubElement(root,'GameAssemblySha').text=sha(GAME/'GameAssembly.dll');items=ET.SubElement(root,'Files')
+root=ET.Element('Payload');ET.SubElement(root,'Version').text='0.2.3.20261016';ET.SubElement(root,'MetadataSha').text=sha(GAME/'MDPro3_Data/il2cpp_data/Metadata/global-metadata.dat');ET.SubElement(root,'UnitySha').text=sha(GAME/'UnityPlayer.dll');ET.SubElement(root,'GameAssemblySha').text=sha(GAME/'GameAssembly.dll');items=ET.SubElement(root,'Files')
 with zipfile.ZipFile(WORK/'payload.zip','w',zipfile.ZIP_DEFLATED,compresslevel=6) as z:
  for rel,(p,scope) in sorted(files.items()):
   node=ET.SubElement(items,'PayloadFile');ET.SubElement(node,'Path').text=rel;ET.SubElement(node,'Sha').text=sha(p);ET.SubElement(node,'Scope').text=scope;z.write(p,rel)

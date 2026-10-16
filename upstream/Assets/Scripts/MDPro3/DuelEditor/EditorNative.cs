@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 namespace MDPro3.DuelEditor {
  public static class EditorLinkRules {
   public const uint MarkerMask=0x1ef;
+  public static int QueryFlags(int flags)=>flags|0x800000;
   public static uint Markers(uint type,uint marker)=>(type&0x4000000)!=0?marker&MarkerMask:0;
   public static uint Rating(uint marker){uint count=0;for(uint bits=marker&MarkerMask;bits!=0;bits>>=1)count+=bits&1;return count;}
  }

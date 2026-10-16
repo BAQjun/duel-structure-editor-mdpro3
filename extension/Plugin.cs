@@ -12,7 +12,7 @@ using UnityEngine;
 using CardDB=MDPro3.Duel.YGOSharp.CardsManager;
 
 namespace DuelStructure {
- [BepInPlugin("cn.duelstructure.mdpro3","决构编辑器","0.2.2")]
+ [BepInPlugin("cn.duelstructure.mdpro3","决构编辑器","0.2.3")]
  public class Plugin:BasePlugin {
   public static Plugin Instance;
   public override void Load(){
@@ -21,7 +21,7 @@ namespace DuelStructure {
    foreach(var name in new[]{"libunwind.dll","libc++.dll","ocgcore_editor.dll"}) NativeLibrary.Load(Path.Combine(dir,name));
    EditorNative.Register(ReadCard,ReadScript,s=>Log.LogWarning("编辑核心: "+s));
    var harmony=new Harmony("cn.duelstructure.mdpro3");harmony.PatchAll(typeof(Plugin).Assembly);
-   AddComponent<EditorBehaviour>();Log.LogInfo("DUEL_EDITOR_READY 0.2.2");
+   AddComponent<EditorBehaviour>();Log.LogInfo("DUEL_EDITOR_READY 0.2.3");
   }
   static NativeCardData ReadCard(uint code){var c=CardDB.Get((int)code,false);var sets=new ushort[16];for(int i=0;i<4;i++)sets[i]=(ushort)((ulong)c.Setcode>>(16*i));return new NativeCardData{Code=(uint)c.Id,Alias=(uint)c.Alias,RuleCode=(uint)c.RuleCode,SetCode=sets,Type=(uint)c.Type,Level=(uint)c.Level,Race=(uint)c.Race,Attribute=(uint)c.Attribute,Attack=c.Attack,Defense=c.Defense,LScale=(uint)c.LScale,RScale=(uint)c.RScale,LinkMarker=(uint)c.LinkMarker};}
   static byte[] ReadScript(string name){name=name.TrimStart('.','/');var bytes=MDPro3.IO.FileManager.GetFile(name);return bytes==null?null:bytes.ToArray();}
@@ -69,7 +69,7 @@ namespace DuelStructure {
   public static bool BeforeAnalyse(Il2CppSystem.IO.BinaryReader reader){long pos=reader.BaseStream.Position;int message=reader.ReadByte();suppress=false;if(EditorPrompt.RequiresResponse(message)){if(message==23)reader.ReadByte();int player=reader.ReadByte();Session.ObservePrompt(player);suppress=player!=Session.View;if(message==16){int count=reader.ReadByte(),sp=reader.ReadByte();reader.ReadInt32();reader.ReadInt32();bool forced=false;for(int i=0;i<count;i++){reader.ReadByte();forced|=reader.ReadByte()!=0;reader.ReadBytes(12);}uint timing=Session.Timings[player];if(!forced&&(count==0||timing==0||(timing==2&&sp==0))){suppress=true;}}}reader.BaseStream.Position=pos;if(message==162){reader.ReadByte();reader.ReadByte();for(int p=0;p<2;p++){reader.ReadInt32();for(int i=0;i<7;i++)if(reader.ReadByte()!=0){reader.ReadByte();reader.ReadByte();}for(int i=0;i<8;i++)if(reader.ReadByte()!=0)reader.ReadByte();reader.ReadBytes(6);}int chains=reader.ReadByte();reader.ReadBytes(chains*15);int size=(int)(reader.BaseStream.Position-pos);reader.BaseStream.Position=pos;Owner.ReceiveHandler(reader.ReadBytes(size));return false;}return true;}
   public static void QueueResponse(byte[] bytes,float delay){Plugin.Instance.Log.LogInfo("EDITOR_RESPONSE_QUEUE view="+Session?.View+" player="+Session?.PromptPlayer+" refresh="+refreshFrame+" delay="+delay);if(Session==null||!Session.Waiting||Session.PromptPlayer!=Session.View||refreshFrame>=0)return;queuedResponse=(byte[])bytes.Clone();responseAt=Time.unscaledTime+Math.Max(0,delay);responseView=Session.View;}
   public static bool Suppress=>suppress;
-  public static Il2CppStructArray<byte> Query(int player,Percy.CardLocation location,int flag){IntPtr buf=Marshal.AllocHGlobal(1024*1024);try{int n=EditorNative.query_field_card(Session.Handle,(byte)player,(byte)location,flag,buf,0);if(n<0||n>1024*1024)throw new InvalidDataException("卡片刷新长度无效");var bytes=new byte[n];Marshal.Copy(buf,bytes,0,n);return bytes;}finally{Marshal.FreeHGlobal(buf);}}
+  public static Il2CppStructArray<byte> Query(int player,Percy.CardLocation location,int flag){IntPtr buf=Marshal.AllocHGlobal(1024*1024);try{int n=EditorNative.query_field_card(Session.Handle,(byte)player,(byte)location,EditorLinkRules.QueryFlags(flag),buf,0);if(n<0||n>1024*1024)throw new InvalidDataException("卡片刷新长度无效");var bytes=new byte[n];Marshal.Copy(buf,bytes,0,n);return bytes;}finally{Marshal.FreeHGlobal(buf);}}
  }
  [HarmonyPatch(typeof(Percy.Ygopro),nameof(Percy.Ygopro.StartPuzzle))]class StartPatch{static bool Prefix(Percy.Ygopro __instance,ref bool __result){if(!Host.Own(__instance)||!Host.Starting)return true;__instance.godMode=true;__result=true;return false;}}
  [HarmonyPatch(typeof(Percy.Ygopro),nameof(Percy.Ygopro.QueryFieldCard))]class QueryPatch{static bool Prefix(Percy.Ygopro __instance,int player,Percy.CardLocation location,int flag,ref Il2CppStructArray<byte> __result){if(NativeReplay.Own(__instance)){__result=NativeReplay.Query(player,location,flag);return false;}if(!Host.Own(__instance))return true;__result=Host.Query(player,location,flag);return false;}}
