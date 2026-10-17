@@ -100,6 +100,14 @@ class SessionSmoke {
    Check(state.ApplyGroup(new[]{host,begin,mat,finish})==0,"Existing opponent deck card can be used as material with exact origin index");Check(state.Cards().Single(c=>c.Id==chosen.Id).Location==16&&state.Cards().Where(c=>c.Player==1&&c.Location==1).OrderBy(c=>c.Sequence).Select(c=>c.Id).SequenceEqual(original.Where(c=>c.Id!=chosen.Id).Select(c=>c.Id)),"Using an existing material preserves its identity and all other deck order");
    var summoned=state.Cards().Single(c=>c.Location==4);ulong hash=EditorNative.editor_state_hash(state.Handle);uint ritual=database.First(kv=>(kv.Value.Type&0x80)!=0).Key;var invalid=mat;invalid.Target=summoned.Id;invalid.Code=ritual;invalid.States=invalid.Restrictions=0;invalid.Location=64;invalid.Position=8;Check(state.ApplyGroup(new[]{invalid})==6&&EditorNative.editor_state_hash(state.Handle)==hash,"Ritual monster material cannot claim an Extra Deck origin");invalid.Location=2;invalid.Value=64;invalid.Level=8;Check(state.ApplyGroup(new[]{invalid})==6&&EditorNative.editor_state_hash(state.Handle)==hash,"Ritual monster material cannot be placed in Extra Deck as destination");
   }
+  foreach(uint specialCode in new uint[]{9433350,72989439})using(var state=new EditorSession(openingSetup)){
+   var host=EditCommand.Create(1);host.Code=specialCode;host.Location=4;host.Value=32|(2<<8);Check(state.Apply(host)==0,"Special Summon-only monster generates from hand: "+specialCode);Check(state.Cards().Any(c=>c.Code==specialCode&&c.Location==4),"Special Summon-only generated monster exists at paused field point: "+specialCode);
+  }
+  foreach(bool fieldPresent in new[]{false,true})using(var state=new EditorSession(openingSetup)){
+   for(int i=0;i<1000&&!state.Waiting;i++)state.Step();Check(state.Waiting,"Special Summon diagnostic reaches decision point");
+   if(fieldPresent){var field=EditCommand.Create(1);field.Code=59197169;field.Location=256;Check(state.Apply(field)==0,"Face-up Field Spell generated before Malefic");}
+   ulong created=0;state.Applied+=(cmd,before,after)=>{if(cmd.Code==9433350)created=after.First(c=>c.Code==9433350&&!before.Any(b=>b.Id==c.Id)).Id;};var host=EditCommand.Create(1);host.Code=9433350;host.Location=4;host.Value=32|(2<<8);Check(state.ApplyGroup(new[]{host})==0,"Malefic creation transaction succeeds");var actual=state.Cards().FirstOrDefault(c=>c.Id==created);Console.WriteLine("MALEFIC field="+fieldPresent+" resultingLocation="+actual.Location+" id="+created);Check(actual.Location==(fieldPresent?4u:16u),"Malefic native self-destruction follows face-up Field Spell presence");
+  }
   Check(errors.Count==0,"No Lua script errors during actual edit/draw/rebuild");
  }
 }

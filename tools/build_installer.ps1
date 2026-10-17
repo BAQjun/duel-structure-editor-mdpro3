@@ -1,4 +1,4 @@
-$ErrorActionPreference='Stop'
+﻿$ErrorActionPreference='Stop'
 $project=Split-Path -Parent $PSScriptRoot
 Set-Location $project
 $env:TEMP=Join-Path $project 'work\installer'
