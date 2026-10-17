@@ -24,7 +24,7 @@ Mono 组件已通过 128 项 64 位核心断言、217 个游戏成员访问检�
 
 ## 构建
 
-构建工具使用 Unity 6000.3.21f1 随附的编译工具、Python 3.14 和 LLVM-MinGW。现有脚本仍包含开发环境路径，构建前需按实际工具安装位置调整。
+构建工具使用 Unity 6000.3.21f1 随附的编译工具、Python 3.14 和 LLVM-MinGW。工具和本体目录通过环境变量或 `build-config.local.json` 配置，无指定盘符要求。详见[路径配置与迁移](docs/路径配置与迁移.md)。
 
 IL2CPP 构建运行 `tools/build_extension.ps1`，需要自己的 MDPro3 互操作程序集及 BepInEx IL2CPP 组件。Mono 构建运行 `tools/build_extension_mono.ps1`，需要将目标 Mono 本体的 Managed 程序集放入 `work/mono-reference`，并在 `vendor/bepinex-mono` 准备 BepInEx 5.4.23.5 Windows x64。原生核心构建依赖 YGOPro 版本的 Lua 和工具链，详见 `tools/build_core.ps1`。
 
@@ -45,3 +45,5 @@ IL2CPP 构建运行 `tools/build_extension.ps1`，需要自己的 MDPro3 互操�
 新增：[对应召唤与素材履历](docs/0.3.0-对应召唤与素材履历.md)，包含真实素材组、来源与去向、龙骑士素材计数及 I:P 素材赋予抗性。
 
 修复：[0.3.1 切换视角时恢复原生连锁](docs/0.3.1-切换视角连锁恢复.md)，避免径武赋予效果的无效显示指向错误卡片；实际双方切换与三段连锁测试通过。
+
+路径兼容更新：v0.3.2 移除开发机盘符与目录依赖，配置和迁移说明见[路径配置与迁移](docs/路径配置与迁移.md)。

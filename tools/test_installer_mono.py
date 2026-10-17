@@ -1,3 +1,4 @@
+from build_config import unity_data
 from pathlib import Path
 import shutil,subprocess,xml.etree.ElementTree as ET,zipfile
 r=Path.cwd();w=r/'work/installer';target=w/'mono-body-fixture';managed=target/'MDPro3_Data/Managed';shutil.copy2(r/'work/mono-reference/Assembly-CSharp.dll',managed/'Assembly-CSharp.dll')
@@ -8,7 +9,7 @@ call('--check');call('--install')
 assert (target/'BepInEx/plugins/DuelStructure/DuelStructure.Mono.dll').read_bytes()==(r/'extension/build/DuelStructure.Mono.dll').read_bytes()
 assert not (target/'BepInEx/interop').exists() and not (target/'dotnet').exists() and not (target/'BepInEx/core/BepInEx.Unity.IL2CPP.dll').exists()
 assert (target/'BepInEx/patchers/DuelStructure/DuelStructure.Mono.Access.dll').exists()
-assert (target/'BepInEx/DuelStructureMonoRuntime/mscorlib.dll').read_bytes()==Path('D:/Unity/Editors/6000.3.21f1/Editor/Data/MonoBleedingEdge/lib/mono/unityjit-win32/mscorlib.dll').read_bytes()
+assert (target/'BepInEx/DuelStructureMonoRuntime/mscorlib.dll').read_bytes()==(unity_data()/'MonoBleedingEdge/lib/mono/unityjit-win32/mscorlib.dll').read_bytes()
 assert (target/'MonoPosixHelper.dll').exists()
 assert '@DUEL_MONO_LIBS@' not in (target/'doorstop_config.ini').read_text(encoding='utf-8')
 assert (managed/'Assembly-CSharp.dll').read_bytes()==(r/'work/mono-reference/Assembly-CSharp.dll').read_bytes()

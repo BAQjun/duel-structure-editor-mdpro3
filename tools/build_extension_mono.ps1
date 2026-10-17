@@ -2,8 +2,11 @@ $ErrorActionPreference='Stop'
 $root=Split-Path $PSScriptRoot -Parent
 Set-Location $root
 New-Item -ItemType Directory -Force work,extension\build | Out-Null
-& 'D:\Codex\tools\Python314\python.exe' tools\generate_mono_sources.py
-$unity='D:\Unity\Editors\6000.3.21f1\Editor\Data'
+. (Join-Path $PSScriptRoot 'build_config.ps1')
+$python = Get-BuildSetting 'python' 'python'
+& $python tools/generate_mono_sources.py
+if ($LASTEXITCODE -ne 0) { throw 'Mono source generation failed' }
+$unity=Get-UnityData
 New-Item -ItemType Directory -Force work\mono-public | Out-Null
 & "$unity\MonoBleedingEdge\bin\mono.exe" "$unity\MonoBleedingEdge\lib\mono\msbuild\Current\bin\Roslyn\csc.exe" /nologo /out:work\MonoPublicize.exe /r:vendor\bepinex-mono\BepInEx\core\Mono.Cecil.dll tools\MonoPublicize.cs
 if($LASTEXITCODE -ne 0){throw 'Mono reference preparation compilation failed'}

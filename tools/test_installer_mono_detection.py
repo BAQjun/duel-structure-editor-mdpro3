@@ -1,6 +1,7 @@
+from build_config import path_setting
 from pathlib import Path
 import subprocess,os,hashlib,zipfile
-r=Path.cwd();w=r/'work/installer';target=w/'mono-body-fixture';target.mkdir(exist_ok=True);exe=r/'outputs/决构编辑器-MDPro3-安装器.exe';game=Path('D:/Game/MDPro3')
+r=Path.cwd();w=r/'work/installer';target=w/'mono-body-fixture';target.mkdir(exist_ok=True);exe=r/'outputs/决构编辑器-MDPro3-安装器.exe';game=path_setting('game_root')
 for name in ['MDPro3.exe','UnityPlayer.dll']:
  p=target/name
  if not p.exists():os.link(game/name,p)

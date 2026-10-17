@@ -1,6 +1,7 @@
+from build_config import path_setting
 from pathlib import Path
 import hashlib,subprocess,json,shutil,os
-ROOT=Path(__file__).resolve().parents[1];WORK=ROOT/'work/installer';EXE=ROOT/'outputs/决构编辑器-MDPro3-安装器.exe';GAME=Path('D:/Game/MDPro3');TARGET=WORK/'fixture-测试本体';TARGET.mkdir(parents=True,exist_ok=True)
+ROOT=Path(__file__).resolve().parents[1];WORK=ROOT/'work/installer';EXE=ROOT/'outputs/决构编辑器-MDPro3-安装器.exe';GAME=path_setting('game_root');TARGET=WORK/'fixture-测试本体';TARGET.mkdir(parents=True,exist_ok=True)
 def h(p):return hashlib.sha256(p.read_bytes()).hexdigest()
 def check(value,text):
  if not value:raise AssertionError(text)

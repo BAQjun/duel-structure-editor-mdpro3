@@ -1,9 +1,10 @@
 $ErrorActionPreference = 'Stop'
 $taskRoot = Split-Path -Parent $PSScriptRoot
-if (-not $taskRoot.StartsWith('D:\')) { throw 'Project must stay on D:.' }
-$baseline = 'D:\Codex\projects\duel-structure-editor'
-$toolBin = Join-Path $baseline 'tools\llvm-mingw-20260616-ucrt-x86_64\bin'
+. (Join-Path $PSScriptRoot 'build_config.ps1')
+$baseline = Get-BuildPath 'ygopro_root' '../duel-structure-editor-ygopro'
+$toolBin = Get-BuildPath 'llvm_mingw_bin' (Join-Path $baseline 'tools/llvm-mingw-20260616-ucrt-x86_64/bin')
 $env:PATH = "$toolBin;$env:PATH"
+New-Item -ItemType Directory -Force (Join-Path $taskRoot 'work') | Out-Null
 $env:TMP = $env:TEMP = Join-Path $taskRoot 'work'
 $dest = Join-Path $taskRoot 'native\build'
 New-Item -ItemType Directory -Force $dest | Out-Null

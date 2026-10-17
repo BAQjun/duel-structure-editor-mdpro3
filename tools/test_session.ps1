@@ -1,6 +1,8 @@
 $ErrorActionPreference='Stop'
 $taskRoot=Split-Path -Parent $PSScriptRoot
-$unityData='D:\Unity\Editors\6000.3.21f1\Editor\Data'
+. (Join-Path $PSScriptRoot 'build_config.ps1')
+$unityData=Get-UnityData
+$env:DUEL_EDITOR_YGOPRO_RUNTIME = Get-BuildPath 'ygopro_runtime'
 $mono=Join-Path $unityData 'MonoBleedingEdge\bin\mono.exe'
 $csc=Join-Path $unityData 'MonoBleedingEdge\lib\mono\msbuild\Current\bin\Roslyn\csc.exe'
 $managed=Join-Path $taskRoot 'upstream\Assets\Scripts\MDPro3\DuelEditor'
