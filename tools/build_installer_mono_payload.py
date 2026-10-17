@@ -21,7 +21,7 @@ add(r/'extension/build/DuelStructure.Mono.Access.dll','BepInEx/patchers/DuelStru
 add(pack/'BepInEx/config/BepInEx.cfg','BepInEx/config/BepInEx.cfg','config')
 readme=w/'mono-compatibility.txt';readme.write_text('Mono 适配组件按提供的 Assembly-CSharp.dll 构建。加载器：BepInEx 5.4.23.5。完整框架组件单独放在 BepInEx/DuelStructureMonoRuntime，原本体 Managed 程序组件不覆盖。访问适配器仅在加载时开放扩展实际使用的成员，不修改本体文件。\n',encoding='utf-8');add(readme,'BepInEx/plugins/DuelStructure/licenses/Mono-compatibility.txt','extension')
 def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
-root=ET.Element('Payload');ET.SubElement(root,'Version').text='0.3.0';ET.SubElement(root,'Runtime').text='Mono';ET.SubElement(root,'MonoAssemblySha').text=sha(r/'work/mono-reference/Assembly-CSharp.dll');ET.SubElement(root,'UnityVersion').text='6000.0.24.1178165';items=ET.SubElement(root,'Files')
+root=ET.Element('Payload');ET.SubElement(root,'Version').text='0.3.1';ET.SubElement(root,'Runtime').text='Mono';ET.SubElement(root,'MonoAssemblySha').text=sha(r/'work/mono-reference/Assembly-CSharp.dll');ET.SubElement(root,'UnityVersion').text='6000.0.24.1178165';items=ET.SubElement(root,'Files')
 with zipfile.ZipFile(w/'mono-payload.zip','w',zipfile.ZIP_DEFLATED,compresslevel=6) as z:
  for rel,(p,scope) in sorted(files.items()):
   f=ET.SubElement(items,'PayloadFile');ET.SubElement(f,'Path').text=rel;ET.SubElement(f,'Sha').text=sha(p);ET.SubElement(f,'Scope').text=scope;z.write(p,rel)

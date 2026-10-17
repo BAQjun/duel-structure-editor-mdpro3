@@ -56,6 +56,6 @@ namespace DuelStructure {
   }
   static int FirstCode(Node node){if(node.Raw!=null&&node.Raw.Code>0)return node.Raw.Code;foreach(var child in node.Children){int code=FirstCode(child);if(code>0)return code;}return 0;}
  }
- [HarmonyPatch(typeof(MDPro3.Duel.DuelMessage),nameof(MDPro3.Duel.DuelMessage.GameMessage_ReloadField))]class RestoreSavedLogContext{static void Postfix(){if(Host.Session!=null)NativeLogArchive.RestoreQueuedContext();}}
+ [HarmonyPatch(typeof(MDPro3.Duel.DuelMessage),nameof(MDPro3.Duel.DuelMessage.GameMessage_ReloadField))]class RestoreSavedLogContext{static void Prefix(Il2CppSystem.IO.BinaryReader reader,out NativeChainState.Link[] __state){__state=null;if(Host.Session==null)return;long position=reader.BaseStream.Position;try{__state=NativeChainState.Read(reader.ReadBytes((int)(reader.BaseStream.Length-position)).ToArray());}finally{reader.BaseStream.Position=position;}} static void Postfix(NativeChainState.Link[] __state){if(Host.Session!=null)NativeLogArchive.RestoreQueuedContext();NativeChainState.Restore(__state);}}
  [HarmonyPatch(typeof(TextureManager),nameof(TextureManager.LoadCardToRawImageWithoutMaterialAsync))]class TrackSavedLogCardImage{static void Prefix(RawImage rawImage,int code){if(Host.Session!=null)NativeLogArchive.Track(rawImage,code);}}
 }
