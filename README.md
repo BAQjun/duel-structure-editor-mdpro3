@@ -36,14 +36,6 @@ IL2CPP 构建运行 `tools/build_extension.ps1`，需要自己的 MDPro3 互操�
 
 核心来自 [Fluorohydride/ygopro-core](https://github.com/Fluorohydride/ygopro-core)，保留 `native/core/LICENSE` 中的 MIT 许可证。扩展使用 [BepInEx](https://github.com/BepInEx/BepInEx) 和 Harmony；这些依赖及 MDPro3、Unity 的版权和许可证属于原作者，本仓库不对其重新授权。
 
-最近修复：[0.2.3 超量转连接的参数问题](docs/0.2.3-Link转换修复.md)。
-
-最新修复：[0.2.4 自定义连接怪兽的表示限制](docs/0.2.4-连接表示限制.md)，已同步两个版本。
-
-最近修复：[0.2.5 自定义连接箭头场面刷新](docs/0.2.5-连接箭头刷新.md)。
-
-最新修复：[自定义连接怪兽的实际连接关系](docs/0.2.6-自定义连接关系.md)，真实脚本验证女男爵可在自定义箭头指向下发动并破坏狮鹫，核心回归 609 项通过。
-
 新增：[对应召唤与素材履历](docs/0.3.0-对应召唤与素材履历.md)，包含真实素材组、来源与去向、龙骑士素材计数及 I:P 素材赋予抗性。
 
 修复：[0.3.1 切换视角时恢复原生连锁](docs/0.3.1-切换视角连锁恢复.md)，避免径武赋予效果的无效显示指向错误卡片；实际双方切换与三段连锁测试通过。
