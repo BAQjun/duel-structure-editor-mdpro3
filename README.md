@@ -35,9 +35,3 @@ IL2CPP 构建运行 `tools/build_extension.ps1`，需要自己的 MDPro3 互操�
 ## 第三方来源
 
 核心来自 [Fluorohydride/ygopro-core](https://github.com/Fluorohydride/ygopro-core)，保留 `native/core/LICENSE` 中的 MIT 许可证。扩展使用 [BepInEx](https://github.com/BepInEx/BepInEx) 和 Harmony；这些依赖及 MDPro3、Unity 的版权和许可证属于原作者，本仓库不对其重新授权。
-
-新增：[对应召唤与素材履历](docs/0.3.0-对应召唤与素材履历.md)，包含真实素材组、来源与去向、龙骑士素材计数及 I:P 素材赋予抗性。
-
-修复：[0.3.1 切换视角时恢复原生连锁](docs/0.3.1-切换视角连锁恢复.md)，避免径武赋予效果的无效显示指向错误卡片；实际双方切换与三段连锁测试通过。
-
-路径兼容更新：v0.3.2 移除开发机盘符与目录依赖，配置和迁移说明见[路径配置与迁移](docs/路径配置与迁移.md)。
